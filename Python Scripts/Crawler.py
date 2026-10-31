@@ -6,16 +6,52 @@ it will visit each faculty page and invoke code to scrape the relevant informati
 
 from bs4 import BeautifulSoup
 import requests
+from urllib.parse import urljoin, urlparse, urldefrag
 
-def department_page_extract(page):
-    pass
-
-def base_crawl(url="https://faculty.rpi.edu/departments"):
+def load_links_to_ignore(filepath):
     '''
-    @brief: central crawling function for project; controls all crawling branches.
+    @brief: reads in banned links fro a text file formatted as 1 link per line
+
+    @param: filepath: the path to the file to read from
+    '''
+    banned_set = set()
+    with open(filepath, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if(line == ""):
+                continue
+            banned_set.add(line)
+
+    return list(banned_set)
+
+def department_page_extract(page, url="https://faculty.rpi.edu/departments"):
+    '''
+    @brief: extracts outlinks from a scraped page.
+
+    @param: url: base url to build off of
+    @param: page: page that has already been scraped
+    @return: list of outgoing links
+    '''
+    next_links = set()
+    for a in page.find_all("a", href=True):
+        href = a["href"].strip()
+        if href.startswith(("mailto:", "tel:", "javascript:")):
+            continue
+        full_url = urljoin(url, href)
+        full = urldefrag(full_url).url
+        banned = load_links_to_ignore("/Data/base_links_to_ignore.txt")
+        if urlparse(full).scheme in ("http", "https"):
+            if full not in banned:
+                next_links.add(full)
+                print(full)
+    return list(next_links)
+
+def init_crawl(url="https://faculty.rpi.edu/departments"):
+    '''
+    @brief: starts off crawling operations by defining a primary crawling space
 
     @param: url: base url for crawling, defaults to department page.
-    @return: True when execution terminates successfully.
+    @return: List of urls for the crawler to use
     '''
 
     # Initiate the crawl by grabbing base page
@@ -27,11 +63,12 @@ def base_crawl(url="https://faculty.rpi.edu/departments"):
         return False #flag for unexpected termination of the function
 
     # Save result to output file:
-    base_html = "base_page.html"
+    base_html = "/Data/base_page.html"
     with open(base_html, "w", encoding="utf-8") as f:
         f.write(soup.prettify())
 
-    print("Saved to {base_html}")
+    print(f"Saved to {base_html}")
+    department_page_extract(soup)
 
 if __name__ == "__main__":
-    base_crawl()
+    init_crawl()
