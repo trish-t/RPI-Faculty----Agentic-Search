@@ -7,6 +7,11 @@ it will visit each faculty page and invoke code to scrape the relevant informati
 from bs4 import BeautifulSoup
 import requests
 from urllib.parse import urljoin, urlparse, urldefrag
+from pathlib import Path
+
+# GLOBAL VARIABLES #
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+IGNORE_FILE = PROJECT_ROOT / "Data" / "base_links_to_ignore.txt"
 
 def load_links_to_ignore(filepath):
     '''
@@ -39,7 +44,7 @@ def department_page_extract(page, url="https://faculty.rpi.edu/departments"):
             continue
         full_url = urljoin(url, href)
         full = urldefrag(full_url).url
-        banned = load_links_to_ignore("/Data/base_links_to_ignore.txt")
+        banned = load_links_to_ignore(IGNORE_FILE)
         if urlparse(full).scheme in ("http", "https"):
             if full not in banned:
                 next_links.add(full)
