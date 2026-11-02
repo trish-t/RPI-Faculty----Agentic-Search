@@ -4,6 +4,7 @@ by faculty member.
 """
 
 class Faculty:
+    faculty_directory_page_url = None
     email = None
     personal_website = None
     phone_number = None
@@ -15,12 +16,15 @@ class Faculty:
     core_department = None
     affiliated_with = None
     titles = None
+    affiliated_departments_links = None
 
-    def __init__(self, first_name, last_name):
+    def __init__(self, first_name, last_name, page_url):
         self.first_name = first_name
         self.last_name = last_name
+        self.faculty_directory_page_url = page_url
         self.affiliated_with = []
         self.titles = []
+        self.affiliated_departments_links = []
 
         def set_email(self, email):
             self.email = email

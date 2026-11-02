@@ -12,10 +12,11 @@ from pathlib import Path
 # GLOBAL VARIABLES #
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 IGNORE_FILE = PROJECT_ROOT / "Data" / "base_links_to_ignore.txt"
+FACULTY_DICTIONARY = dict() #key = faculty_profile url; value = Faculty object
 
 def load_links_to_ignore(filepath):
     '''
-    @brief: reads in banned links fro a text file formatted as 1 link per line
+    @brief: reads in banned links from a text file formatted as 1 link per line
 
     @param: filepath: the path to the file to read from
     '''
@@ -49,14 +50,14 @@ def department_page_extract(page, url="https://faculty.rpi.edu/departments"):
             if full not in banned:
                 next_links.add(full)
                 print(full)
-    return list(next_links)
+    return next_links
 
 def init_crawl(url="https://faculty.rpi.edu/departments"):
     '''
     @brief: starts off crawling operations by defining a primary crawling space
 
     @param: url: base url for crawling, defaults to department page.
-    @return: List of urls for the crawler to use
+    @return: tuple of list of urls for the crawler to use, and list of visited urls
     '''
 
     # Initiate the crawl by grabbing base page
@@ -65,7 +66,7 @@ def init_crawl(url="https://faculty.rpi.edu/departments"):
         soup = BeautifulSoup(page.text, "html.parser")
     except Exception as e:
         print("Error requesting base url: {e}")
-        return False #flag for unexpected termination of the function
+        exit #flag for unexpected termination of the function
 
     # Save result to output file:
     base_html = "/Data/base_page.html"
@@ -73,7 +74,24 @@ def init_crawl(url="https://faculty.rpi.edu/departments"):
         f.write(soup.prettify())
 
     print(f"Saved to {base_html}")
-    department_page_extract(soup)
+    return (department_page_extract(soup), set([url]))
+
+def bfs(visited, hops):
+    """
+    @brief: main crawling procedure following the BFS algorithm with limited hops
+
+    @param: visited: set of links that have already been visited by the search
+    @param: hops: number of hops taken from base of the search
+    @effects: faculty dictionary by adding new faculty information where applicable 
+    """
+    pass
+
 
 if __name__ == "__main__":
-    init_crawl()
+    tup1 = init_crawl()
+    to_crawl = tup1[0]
+    visited = tup1[1]
+
+    print(to_crawl)
+    print()
+    print(visited)
