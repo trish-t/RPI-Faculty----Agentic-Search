@@ -1,0 +1,182 @@
+/* ==========================================================
+   Faculty Finder — new components
+   Map these tokens to your existing ones if names differ.
+   ========================================================== */
+:root {
+  --bg: #f5f3ee;
+  --surface: #fdfcf9;
+  --surface-muted: #efece5;
+  --border: #e2ddd3;
+  --text: #1f1d1a;
+  --text-muted: #6b665d;
+  --red: #9b2423;          /* RPI red (buttons, accents) */
+  --red-soft: #f6e4e1;     /* pink card tint */
+  --green-soft: #e5e9df;   /* sage card tint */
+  --tan-soft: #efe9dc;     /* tan card tint */
+  --ok: #3f6b3a;
+  --warn: #8a5a12;
+  --warn-soft: #f7ecd7;
+  --radius: 10px;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-serif: "Instrument Serif", Georgia, serif;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 14px/1.5 var(--font-sans);
+}
+.page { max-width: 1100px; margin: 0 auto; padding: 32px 16px 64px; }
+.section-label {
+  font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--red); font-weight: 600; margin: 40px 0 10px;
+}
+.section-label:first-child { margin-top: 0; }
+
+/* ---------- 1. Search mode toggle + course autocomplete ---------- */
+.search-mode {
+  display: inline-flex; gap: 4px; padding: 4px;
+  background: var(--surface-muted); border-radius: 999px; margin-bottom: 12px;
+}
+.search-mode button {
+  border: 0; background: transparent; padding: 6px 14px; border-radius: 999px;
+  font: inherit; color: var(--text-muted); cursor: pointer;
+}
+.search-mode button[aria-pressed="true"] {
+  background: var(--surface); color: var(--text); font-weight: 600;
+  box-shadow: 0 1px 2px rgb(0 0 0 / .08);
+}
+
+.search-box { position: relative; }
+.search-box input {
+  width: 100%; padding: 16px 18px; font: 17px var(--font-sans);
+  border: 1.5px solid var(--text); border-radius: var(--radius);
+  background: var(--surface);
+}
+.search-box input:focus { outline: 2px solid var(--red); outline-offset: 2px; }
+
+.suggestions {
+  list-style: none; margin: 6px 0 0; padding: 6px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: 0 8px 24px rgb(0 0 0 / .08);
+}
+.suggestions li {
+  display: grid; grid-template-columns: 96px 1fr auto; gap: 12px; align-items: center;
+  padding: 10px 12px; border-radius: 6px; cursor: pointer;
+}
+.suggestions li:hover, .suggestions li[aria-selected="true"] { background: var(--red-soft); }
+.course-code { font-weight: 600; font-variant-numeric: tabular-nums; }
+.course-dept { font-size: 12px; color: var(--text-muted); }
+
+/* ---------- 2. Course context card ---------- */
+.course-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 24px;
+  display: grid; grid-template-columns: 1fr 280px; gap: 32px;
+}
+.course-card h2 {
+  font: 400 34px/1.1 var(--font-serif); margin: 4px 0 8px;
+}
+.meta-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.chip {
+  font-size: 12px; padding: 3px 10px; border-radius: 4px;
+  background: var(--surface-muted); color: var(--text);
+}
+.taught-by h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); margin: 0 0 8px; }
+.taught-by ul { list-style: none; margin: 0; padding: 0; }
+.taught-by li {
+  display: flex; justify-content: space-between; padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.taught-by li span:last-child { color: var(--text-muted); font-size: 12px; }
+
+/* ---------- 3. Source / freshness line (reused everywhere) ---------- */
+.source-line {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px;
+  margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--border);
+  font-size: 12px; color: var(--text-muted);
+}
+.source-line a { color: var(--red); text-decoration: none; }
+.source-line a:hover { text-decoration: underline; }
+.badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px;
+}
+.badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.badge--verified { color: var(--ok); background: #e3eddf; }
+.badge--partial  { color: var(--warn); background: var(--warn-soft); }
+
+/* ---------- 4. Agent progress steps ---------- */
+.agent-steps {
+  list-style: none; margin: 0; padding: 16px 20px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  display: grid; gap: 10px;
+}
+.agent-steps li { display: flex; align-items: center; gap: 10px; color: var(--text-muted); }
+.agent-steps li::before {
+  content: ""; width: 14px; height: 14px; border-radius: 50%;
+  border: 2px solid var(--border); flex: none;
+}
+.agent-steps li.done { color: var(--text); }
+.agent-steps li.done::before { background: var(--ok); border-color: var(--ok); }
+.agent-steps li.active { color: var(--text); font-weight: 600; }
+.agent-steps li.active::before {
+  border-color: var(--red); border-top-color: transparent;
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .agent-steps li.active::before { animation: none; } }
+
+/* ---------- 5. Agent answer with citations ---------- */
+.agent-answer {
+  background: var(--surface); border: 1px solid var(--border);
+  border-left: 3px solid var(--red); border-radius: var(--radius); padding: 20px 24px;
+}
+.agent-answer p { margin: 0 0 10px; }
+.cite {
+  font-size: 11px; font-weight: 600; vertical-align: super; line-height: 0;
+  color: var(--red); text-decoration: none; padding: 0 2px;
+}
+.sources { margin: 14px 0 0; padding: 12px 0 0 20px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text-muted); }
+.sources a { color: var(--text); }
+
+/* ---------- 6. Upgraded faculty card ---------- */
+.faculty-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px 24px;
+  display: grid; grid-template-columns: 48px 1fr auto; gap: 16px;
+}
+.avatar {
+  width: 48px; height: 48px; border-radius: 50%; background: var(--red-soft);
+  display: grid; place-items: center; font-weight: 600; color: var(--red);
+}
+.faculty-card h3 { margin: 0; font-size: 19px; }
+.faculty-card .dept { color: var(--text-muted); margin: 2px 0 10px; }
+.teaches { font-size: 13px; margin: 10px 0 0; }
+.teaches strong { font-weight: 600; }
+.contact { display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
+.btn {
+  display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px;
+  border-radius: 6px; font: 600 13px var(--font-sans); text-decoration: none; cursor: pointer;
+}
+.btn--primary { background: var(--red); color: #fff; border: 0; }
+.btn--ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+
+/* ---------- 7. "Couldn't confirm" state ---------- */
+.not-found {
+  background: var(--warn-soft); border: 1px solid #ead7b2; border-radius: var(--radius);
+  padding: 18px 22px; color: #4a3510;
+}
+.not-found h3 { margin: 0 0 6px; font-size: 15px; }
+.not-found p { margin: 0 0 12px; }
+
+/* ---------- Mobile ---------- */
+@media (max-width: 720px) {
+  .course-card { grid-template-columns: 1fr; gap: 20px; }
+  .faculty-card { grid-template-columns: 40px 1fr; }
+  .contact { grid-column: 1 / -1; flex-direction: row; align-items: center; }
+  .suggestions li { grid-template-columns: 80px 1fr; }
+  .suggestions li .course-dept { grid-column: 2; }
+}

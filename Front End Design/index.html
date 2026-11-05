@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Faculty Finder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ================= Design tokens ================= */
+:root{
+  --bg:#f5f3ee; --surface:#fdfcf9; --muted-bg:#efece6; --border:#e3dfd6;
+  --text:#1f1d1a; --muted:#6f6a61; --red:#9b2423; --red-dark:#7f1c1b;
+  --pink:#f3e1df; --sage:#e4e8de; --tan:#eee8dc;
+  --ok:#3f6b3a; --ok-bg:#e3ecdf; --warn:#8a5a12; --warn-bg:#f6ebd6;
+  --serif:"Instrument Serif",Georgia,serif; --sans:"Inter",system-ui,sans-serif;
+  --r:8px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 var(--sans)}
+a{color:inherit}
+.wrap{max-width:1400px;margin:0 auto;padding:0 40px}
+.eyebrow{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--red);font-weight:500}
+.tag{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border:1px solid var(--border);border-radius:4px;padding:2px 6px}
+
+/* ================= Header ================= */
+.site-header{background:var(--surface);border-bottom:1px solid var(--border)}
+.site-header .wrap{display:flex;align-items:center;height:76px;gap:24px}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none}
+.brand-logo{background:var(--red);color:#fff;font-weight:700;font-size:18px;padding:6px 10px;border-radius:2px}
+.brand-name{font-size:17px;line-height:1.1}
+.brand-sub{display:block;font-size:10px;letter-spacing:.06em;color:var(--muted);text-transform:uppercase}
+.nav{margin:0 auto;display:flex;gap:30px;height:100%}
+.nav a{display:flex;align-items:center;text-decoration:none;color:var(--muted);border-bottom:2px solid transparent}
+.nav a[aria-current="page"]{color:var(--red);font-weight:500;border-color:var(--red)}
+.pill{font-size:12px;color:var(--muted);border:1px solid var(--border);border-radius:999px;padding:5px 12px}
+
+/* ================= Hero + search ================= */
+.hero{padding:28px 0 20px;border-bottom:1px solid var(--border)}
+.hero-top{display:flex;justify-content:space-between;align-items:flex-end;gap:24px}
+.hero h1{font:400 44px/1.05 var(--serif);margin:8px 0 18px}
+.hero-top p{color:var(--muted);max-width:380px;margin:0 0 20px}
+
+.search-mode{display:inline-flex;gap:2px;padding:3px;background:var(--muted-bg);border-radius:999px;margin-bottom:10px}
+.search-mode button{border:0;background:none;font:inherit;font-size:13px;color:var(--muted);padding:5px 14px;border-radius:999px;cursor:pointer}
+.search-mode button[aria-pressed="true"]{background:var(--surface);color:var(--text);font-weight:500;box-shadow:0 1px 2px rgb(0 0 0/.08)}
+
+.search{position:relative;display:flex;align-items:center;gap:12px;background:var(--surface);border:1.5px solid var(--text);border-radius:var(--r);padding:6px 6px 6px 18px}
+.search > svg{flex:none;color:var(--red)}
+.search input::-webkit-search-cancel-button{-webkit-appearance:none}
+.search input{flex:1;border:0;background:none;font:18px var(--sans);color:var(--text);padding:8px 0;min-width:0}
+.search input:focus{outline:none}
+.search:focus-within{box-shadow:0 0 0 3px var(--pink)}
+.btn-primary{display:inline-flex;align-items:center;gap:10px;background:var(--red);color:#fff;border:0;border-radius:6px;padding:12px 20px;font:500 14px var(--sans);cursor:pointer}
+.btn-primary:hover{background:var(--red-dark)}
+
+.suggestions{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:5;list-style:none;margin:0;padding:6px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:0 10px 30px rgb(0 0 0/.08)}
+.suggestions li{display:grid;grid-template-columns:90px 1fr auto;gap:12px;padding:10px 12px;border-radius:6px;cursor:pointer}
+.suggestions li:hover,.suggestions li[aria-selected="true"]{background:var(--pink)}
+.code{font-weight:600}
+.suggestions .dept{color:var(--muted);font-size:12px}
+
+.filters{display:flex;align-items:center;gap:10px;margin-top:18px}
+.select{display:inline-flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:7px 12px;font-size:13px}
+.filters .reset{color:var(--muted);font-size:13px;margin-left:4px}
+.filters .note{margin-left:auto;color:var(--muted);font-size:12px}
+
+/* ================= Layout ================= */
+.layout{display:grid;grid-template-columns:1fr 322px;gap:26px;padding-top:26px;padding-bottom:48px}
+.section-head{display:flex;align-items:center;gap:10px;margin:0 0 14px}
+.section-head h2{font-size:19px;font-weight:600;margin:0}
+.section-head .sub{color:var(--muted);font-size:13px}
+.section-head .right{margin-left:auto;font-size:12px;color:var(--muted)}
+.caption{font-size:11px;color:var(--muted);margin:10px 0 28px}
+
+/* Course context card (Course mode only) */
+.course-card{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--red);border-radius:var(--r);padding:22px 24px;display:grid;grid-template-columns:1fr 260px;gap:28px;margin-bottom:28px}
+.course-card h2{font:400 32px/1.1 var(--serif);margin:4px 0 10px}
+.course-card p{margin:10px 0 0;color:#3b3833}
+.taught h3{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 6px;font-weight:600}
+.taught ul{list-style:none;margin:0;padding:0}
+.taught li{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)}
+.taught li span:last-child{color:var(--muted);font-size:12px}
+
+/* Topic cards */
+.topics{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.topic{border-radius:var(--r);padding:20px 18px 18px;position:relative;min-height:188px;text-decoration:none;display:flex;flex-direction:column}
+.topic.pink{background:var(--pink)} .topic.sage{background:var(--sage)} .topic.tan{background:var(--tan)}
+.topic .ico{width:26px;height:26px;border:1.5px solid currentColor;border-radius:50%;display:grid;place-items:center;font-size:11px;color:var(--muted)}
+.topic.pink .ico{color:var(--red)}
+.topic h3{font-size:19px;font-weight:600;margin:28px 0 4px}
+.topic .kw{font-size:11px;color:var(--muted)}
+.topic .people{margin-top:auto;border-top:1px solid rgb(0 0 0/.12);padding-top:10px;font-size:11px;display:flex;justify-content:space-between;align-items:flex-end}
+.topic.pink .people{color:var(--red);border-color:rgb(155 36 35/.35)}
+.topic svg.deco{position:absolute;top:14px;right:16px;opacity:.7}
+
+/* Faculty cards */
+.list{display:grid;gap:12px}
+.fac{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px;display:grid;grid-template-columns:40px 40px 1fr auto;gap:14px;align-items:start}
+.rank{font:400 26px/1 var(--serif);color:var(--red);padding-top:4px}
+.fac:not(:first-child) .rank{color:var(--muted)}
+.avatar{width:38px;height:38px;border-radius:50%;background:var(--muted-bg);display:grid;place-items:center;font-size:11px;font-weight:600;color:var(--muted)}
+.fac:first-child .avatar{background:var(--pink);color:var(--red)}
+.fac h3{font-size:18px;font-weight:500;margin:0}
+.fac .dept{color:var(--muted);font-size:12px;margin:0 0 8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:11px;background:var(--muted-bg);padding:2px 8px;border-radius:3px}
+.why{font-size:12px;margin:10px 0 0}
+.why b{font-weight:600}
+.src{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;font-size:11px;color:var(--muted);margin-top:10px;padding-top:9px;border-top:1px dashed var(--border)}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:600;padding:1px 7px;border-radius:999px}
+.badge::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor}
+.badge.ok{color:var(--ok);background:var(--ok-bg)} .badge.part{color:var(--warn);background:var(--warn-bg)}
+.fac-actions{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.link-red{color:var(--red);font-size:12px;text-decoration:none;white-space:nowrap}
+.link-red:hover{text-decoration:underline}
+.btn-ghost{font-size:12px;border:1px solid var(--border);border-radius:5px;padding:4px 10px;text-decoration:none;background:var(--surface)}
+
+/* ================= Research guide (agent) ================= */
+.guide{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;position:sticky;top:16px}
+.guide-head{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--border)}
+.guide-head .mark{width:26px;height:26px;border-radius:6px;background:var(--pink);color:var(--red);display:grid;place-items:center;font-size:13px}
+.guide-head strong{font-size:15px}
+.guide-head .tag{margin-left:auto}
+.guide-hero{background:var(--muted-bg);padding:18px}
+.guide-hero h2{font:400 28px/1.05 var(--serif);margin:0 0 12px}
+.guide-hero .q{font-size:12px}
+.guide-body{padding:16px 18px;display:grid;gap:12px;font-size:13px}
+.guide-body p{margin:0}
+.you{background:var(--muted-bg);border-radius:6px;padding:10px 12px}
+.you .eyebrow{color:var(--muted)}
+.cite{color:var(--red);font-size:10px;font-weight:600;vertical-align:super;line-height:0;text-decoration:none;margin-left:1px}
+.steps{list-style:none;margin:0;padding:10px 12px;border:1px solid var(--border);border-radius:6px;display:grid;gap:6px;font-size:12px;color:var(--muted)}
+.steps li{display:flex;gap:8px;align-items:center}
+.steps li::before{content:"";width:10px;height:10px;border-radius:50%;border:1.5px solid var(--border);flex:none}
+.steps li.done{color:var(--text)} .steps li.done::before{background:var(--ok);border-color:var(--ok)}
+.steps li.active{color:var(--text);font-weight:500}
+.steps li.active::before{border-color:var(--red);border-top-color:transparent;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.steps li.active::before{animation:none}}
+.sources{margin:0;padding:10px 0 0 16px;border-top:1px solid var(--border);font-size:11px;color:var(--muted)}
+.chip-link{display:flex;justify-content:space-between;background:var(--sage);border-radius:5px;padding:8px 10px;font-size:12px;text-decoration:none}
+.choice{display:flex;justify-content:space-between;border:1px solid var(--border);border-radius:5px;padding:7px 10px;font-size:12px;background:none;font-family:inherit;cursor:pointer;text-align:left;width:100%}
+.composer{border-top:1px solid var(--border);padding:14px}
+.composer-box{border:1px solid var(--border);border-radius:6px;padding:10px 12px;display:grid;gap:10px}
+.composer textarea{border:0;resize:none;font:13px var(--sans);background:none;min-height:20px}
+.composer textarea:focus{outline:none}
+.composer-row{display:flex;justify-content:space-between;align-items:center;font-size:10px;color:var(--muted)}
+.send{width:28px;height:28px;border-radius:5px;background:var(--red);color:#fff;border:0;cursor:pointer}
+.guide-foot{font-size:11px;color:var(--muted);margin:14px 4px 0}
+.guide-foot strong{color:var(--text);display:block;margin-bottom:4px}
+
+[hidden]{display:none!important}
+
+/* ================= Responsive ================= */
+@media (max-width:1000px){
+  .layout{grid-template-columns:1fr} .guide{position:static}
+  .nav{display:none} .pill{margin-left:auto}
+}
+@media (max-width:720px){
+  .wrap{padding:0 16px}
+  .hero-top{display:block} .hero h1{font-size:36px}
+  .search{flex-wrap:wrap;padding:6px 6px 6px 14px}
+  .search .btn-primary{width:100%;justify-content:center}
+  .filters{flex-wrap:wrap} .filters .note{margin-left:0;width:100%}
+  .topics{grid-template-columns:1fr}
+  .course-card{grid-template-columns:1fr}
+  .fac{grid-template-columns:38px 1fr}
+  .fac .rank{display:none}
+  .fac-actions{grid-column:1/-1;flex-direction:row;align-items:center}
+  .pill{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ================= Header ================= -->
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="#">
+      <span class="brand-logo">RPI</span>
+      <span class="brand-name">Faculty Finder<span class="brand-sub">Rensselaer Polytechnic Institute</span></span>
+    </a>
+    <nav class="nav" aria-label="Main">
+      <a href="#" aria-current="page">Faculty search</a>
+      <a href="#">Topic explorer</a>
+      <a href="#">About this demo</a>
+    </nav>
+    <span class="pill">Research discovery demo</span>
+  </div>
+</header>
+
+<!-- ================= Hero + search ================= -->
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-top">
+      <div>
+        <span class="eyebrow">Research, connected</span>
+        <h1>Explore research expertise.</h1>
+      </div>
+      <p>Search by course, research topic or name. Every answer links to the page it came from.</p>
+    </div>
+
+    <!-- NEW: search type toggle -->
+    <div class="search-mode" role="group" aria-label="Search type">
+      <button type="button" data-mode="course" aria-pressed="false">Course</button>
+      <button type="button" data-mode="topic" aria-pressed="true">Research topic</button>
+      <button type="button" data-mode="name" aria-pressed="false">Faculty name</button>
+    </div>
+
+    <form class="search" role="search" onsubmit="return false">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" value="artificial intelligence &amp; machine learning" aria-label="Search" autocomplete="off">
+      <button class="btn-primary" type="submit">Find faculty
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+      <!-- NEW: course suggestions (shown in Course mode) -->
+      <ul class="suggestions" id="suggestions" role="listbox" hidden>
+        <li role="option" aria-selected="true"><span class="code">CSCI 4100</span><span>Machine Learning from Data</span><span class="dept">Computer Science</span></li>
+        <li role="option"><span class="code">ECSE 4850</span><span>Intro to Deep Learning</span><span class="dept">ECSE</span></li>
+        <li role="option"><span class="code">ITWS 4310</span><span>Managing &amp; Maintaining a Website</span><span class="dept">ITWS</span></li>
+      </ul>
+    </form>
+
+    <div class="filters">
+      <span class="select">All departments ▾</span>
+      <span class="select">All research topics ▾</span>
+      <a class="reset" href="#">Reset</a>
+      <span class="note">Sample data · not yet connected to live search</span>
+    </div>
+  </div>
+</section>
+
+<!-- ================= Main ================= -->
+<div class="wrap layout">
+  <main>
+
+    <!-- NEW: course context card (Course mode only) -->
+    <article class="course-card" id="course-card" hidden>
+      <div>
+        <span class="code">CSCI 4100</span>
+        <h2>Machine Learning from Data</h2>
+        <div class="chips"><span class="chip">4 credits</span><span class="chip">Computer Science</span><span class="chip">Prereq: sample</span></div>
+        <p>Catalog description goes here, quoted from the course catalog rather than paraphrased by the agent.</p>
+        <div class="src"><span class="badge ok">Verified</span>From <a class="link-red" href="#">RPI Course Catalog</a>· Retrieved Nov 3, 2026</div>
+      </div>
+      <aside class="taught">
+        <h3>Recently taught by</h3>
+        <ul>
+          <li><span>Malik Magdon-Ismail</span><span>Sample term</span></li>
+          <li><span>Instructor name</span><span>Sample term</span></li>
+        </ul>
+        <div class="src"><span class="badge part">Partial</span>2 of last 4 terms found</div>
+      </aside>
+    </article>
+
+    <!-- Topic landscape -->
+    <div class="section-head">
+      <h2>A landscape of related ideas</h2><span class="tag">Illustrative topic map</span>
+    </div>
+    <div class="topics">
+      <a class="topic pink" href="#">
+        <svg class="deco" width="96" height="44" viewBox="0 0 96 44" fill="none" stroke="#9b2423" stroke-width=".8"><path d="M4 36 32 6l20 22-28 12Z M32 6l-8 34"/><circle cx="32" cy="6" r="2" fill="#9b2423"/><circle cx="52" cy="28" r="2" fill="#9b2423"/><circle cx="88" cy="4" r="2.5" fill="#9b2423"/></svg>
+        <span class="ico">⚇</span>
+        <h3>Data &amp; learning</h3>
+        <span class="kw">Data mining · Learning theory · Algorithms</span>
+        <span class="people"><span>Mohammed J. Zaki<br>Malik Magdon-Ismail</span><span>↗</span></span>
+      </a>
+      <a class="topic sage" href="#">
+        <svg class="deco" width="110" height="44" viewBox="0 0 110 44" fill="none" stroke="#3b3a33" stroke-width=".8"><path d="M4 8l102 32M4 40 106 8M46 2v40"/><circle cx="55" cy="24" r="2.2" fill="#3b3a33"/><circle cx="10" cy="10" r="2" fill="#3b3a33"/><circle cx="100" cy="10" r="2" fill="#3b3a33"/></svg>
+        <span class="ico">⚇</span>
+        <h3>Perception &amp; robotics</h3>
+        <span class="kw">Computer vision · Causality · Robotics</span>
+        <span class="people"><span>Qiang Ji</span><span>↗</span></span>
+      </a>
+      <a class="topic tan" href="#">
+        <svg class="deco" width="96" height="44" viewBox="0 0 96 44" fill="none" stroke="#6b5a3e" stroke-width=".8"><path d="M4 22 30 4v36L4 22Zm26-18 30 30M30 40 60 4M92 4v36"/><circle cx="30" cy="4" r="2" fill="#6b5a3e"/><circle cx="60" cy="22" r="2" fill="#6b5a3e"/></svg>
+        <span class="ico">⚇</span>
+        <h3>Knowledge &amp; cognition</h3>
+        <span class="kw">Semantic Web · Agents · Neural-symbolic AI</span>
+        <span class="people"><span>James Hendler<br>Ron Sun</span><span>↗</span></span>
+      </a>
+    </div>
+    <p class="caption">Faculty grouped by shared research themes. Topics can overlap.</p>
+
+    <!-- Faculty matches -->
+    <div class="section-head">
+      <h2>Faculty matches</h2><span class="sub">5 matches</span>
+      <span class="right">Order: <b>Best match</b> ▾</span>
+    </div>
+
+    <div class="list">
+      <article class="fac">
+        <span class="rank">01</span><span class="avatar">MZ</span>
+        <div>
+          <h3>Mohammed J. Zaki</h3><p class="dept">Computer Science</p>
+          <div class="chips"><span class="chip">Data mining</span><span class="chip">Machine learning</span><span class="chip">Graph &amp; textual data</span></div>
+          <p class="why"><b>Why this match</b>&nbsp; Connects machine learning with discovering patterns in graph-structured and textual data.</p>
+          <div class="src"><span class="badge ok">Verified</span>From faculty.rpi.edu · Retrieved Nov 3, 2026</div>
+        </div>
+        <div class="fac-actions"><a class="link-red" href="#">Source profile ↗</a><a class="btn-ghost" href="#">Email</a></div>
+      </article>
+
+      <article class="fac">
+        <span class="rank">02</span><span class="avatar">MM</span>
+        <div>
+          <h3>Malik Magdon-Ismail</h3><p class="dept">Computer Science</p>
+          <div class="chips"><span class="chip">Learning theory</span><span class="chip">Algorithms &amp; applications</span><span class="chip">Quantum computing</span></div>
+          <p class="why"><b>Why this match</b>&nbsp; A strong starting point for the theoretical foundations and algorithmic side of machine learning.</p>
+          <div class="src"><span class="badge ok">Verified</span>From faculty.rpi.edu · Retrieved Nov 3, 2026</div>
+        </div>
+        <div class="fac-actions"><a class="link-red" href="#">Source profile ↗</a><a class="btn-ghost" href="#">Email</a></div>
+      </article>
+
+      <article class="fac">
+        <span class="rank">03</span><span class="avatar">QJ</span>
+        <div>
+          <h3>Qiang Ji</h3><p class="dept">Electrical, Computer, and Systems Engineering</p>
+          <div class="chips"><span class="chip">Probabilistic ML</span><span class="chip">Computer vision</span><span class="chip">Causal inference</span><span class="chip">Robotics</span></div>
+          <p class="why"><b>Why this match</b>&nbsp; Links probabilistic learning and causal inference to visual understanding and robotics.</p>
+          <div class="src"><span class="badge ok">Verified</span>From faculty.rpi.edu · Retrieved Nov 3, 2026</div>
+        </div>
+        <div class="fac-actions"><a class="link-red" href="#">Source profile ↗</a><a class="btn-ghost" href="#">Email</a></div>
+      </article>
+
+      <article class="fac">
+        <span class="rank">04</span><span class="avatar">JH</span>
+        <div>
+          <h3>James Hendler</h3><p class="dept">AI · Semantic Web · Knowledge integration</p>
+          <div class="chips"><span class="chip">Artificial intelligence</span><span class="chip">Semantic Web</span><span class="chip">Intelligent agents</span></div>
+          <p class="why"><b>Why this match</b>&nbsp; Relevant to AI systems that integrate knowledge and use intelligent agents.</p>
+          <div class="src"><span class="badge part">Partial</span>Bio found · research areas not listed on profile</div>
+        </div>
+        <div class="fac-actions"><a class="link-red" href="#">Source profile ↗</a><a class="btn-ghost" href="#">Email</a></div>
+      </article>
+
+      <article class="fac">
+        <span class="rank">05</span><span class="avatar">RS</span>
+        <div>
+          <h3>Ron Sun</h3><p class="dept">Cognitive architectures · Learning &amp; cognition</p>
+          <div class="chips"><span class="chip">Cognitive architectures</span><span class="chip">Neural-symbolic systems</span><span class="chip">Multi-agent cognition</span></div>
+          <p class="why"><b>Why this match</b>&nbsp; Bridges learning and cognition through cognitive architectures and neural-symbolic systems.</p>
+          <div class="src"><span class="badge ok">Verified</span>From faculty.rpi.edu · Retrieved Nov 3, 2026</div>
+        </div>
+        <div class="fac-actions"><a class="link-red" href="#">Source profile ↗</a><a class="btn-ghost" href="#">Email</a></div>
+      </article>
+    </div>
+  </main>
+
+  <!-- ================= Research guide (agent) ================= -->
+  <aside>
+    <section class="guide" aria-label="Research guide">
+      <div class="guide-head"><span class="mark">✦</span><strong>Research guide</strong><span class="tag">AI agent</span></div>
+      <div class="guide-hero">
+        <h2>A sharper question.<br>A clearer direction.</h2>
+        <span class="eyebrow" style="color:var(--muted)">↳ Exploring your search</span>
+        <div class="q">artificial intelligence &amp; machine learning</div>
+      </div>
+      <div class="guide-body">
+        <span class="eyebrow">Research guide</span>
+        <p>AI is a broad starting point. Are you more interested in learning from data, perception and robotics, or knowledge and cognition?</p>
+
+        <div class="you"><span class="eyebrow">You</span><p>I'm interested in explainable AI for robots. Where should I start?</p></div>
+
+        <!-- NEW: agent progress -->
+        <ol class="steps" aria-live="polite">
+          <li class="done">Matched 2 faculty profiles</li>
+          <li class="done">Checked both profiles for current info</li>
+          <li class="active">Writing your answer…</li>
+        </ol>
+
+        <span class="eyebrow">Research guide</span>
+        <!-- NEW: citations -->
+        <p>Start with <b>Qiang Ji</b> for probabilistic machine learning, causal inference and robotics<a class="cite" href="#s1">1</a>.</p>
+        <p>For a complementary perspective, explore <b>Ron Sun</b> for neural-symbolic systems and cognitive architectures<a class="cite" href="#s2">2</a>.</p>
+        <ol class="sources">
+          <li id="s1">faculty.rpi.edu: Qiang Ji · Nov 3, 2026</li>
+          <li id="s2">faculty.rpi.edu: Ron Sun · Nov 3, 2026</li>
+        </ol>
+
+        <a class="chip-link" href="#"><span>⚇ Perception &amp; robotics</span><span>↗</span></a>
+        <p>Would you rather focus on physical robots or how an agent reasons?</p>
+        <button class="choice" type="button">Focus on robotics &amp; causality <span>↖</span></button>
+        <button class="choice" type="button">Explore neural-symbolic systems <span>↖</span></button>
+      </div>
+      <div class="composer">
+        <div class="composer-box">
+          <textarea rows="1" placeholder="Tell me what you'd like to explore…" aria-label="Message the research guide"></textarea>
+          <div class="composer-row"><span>Shift + Enter for a new line</span><button class="send" aria-label="Send">↑</button></div>
+        </div>
+      </div>
+    </section>
+    <p class="guide-foot"><strong>A starting point, not a verdict.</strong>Read the linked faculty pages before deciding whose work aligns with your question.</p>
+  </aside>
+</div>
+
+<script>
+  // Search-type toggle: shows course suggestions + course card in Course mode.
+  const input = document.getElementById('q');
+  const suggestions = document.getElementById('suggestions');
+  const courseCard = document.getElementById('course-card');
+  const placeholders = {
+    course: 'Course code or name, e.g. CSCI 4100',
+    topic: 'A research topic, e.g. machine learning',
+    name: 'A faculty member, e.g. Qiang Ji'
+  };
+
+  document.querySelectorAll('.search-mode button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.search-mode button')
+        .forEach(b => b.setAttribute('aria-pressed', b === btn));
+      const mode = btn.dataset.mode;
+      input.placeholder = placeholders[mode];
+      input.value = mode === 'course' ? 'machine learn' : '';
+      suggestions.hidden = mode !== 'course';
+      courseCard.hidden = mode !== 'course';
+      input.focus();
+    });
+  });
+
+  // Close suggestions when one is picked
+  suggestions.addEventListener('click', e => {
+    const li = e.target.closest('li');
+    if (!li) return;
+    input.value = li.querySelector('.code').textContent + ' ' + li.children[1].textContent;
+    suggestions.hidden = true;
+  });
+</script>
+</body>
+</html>
